@@ -1,15 +1,19 @@
-package org.fintech.solanawallet.domains.wallet.controller;
+package org.fintech.solanawallet.domain.wallet.controller;
 
-import com.example.solanawallet.dto.TransferRequestDto;
-import com.example.solanawallet.service.TransferService;
-import com.example.solanawallet.service.WalletService;
+import org.fintech.solanawallet.domain.wallet.dto.TransferRequestDTO;
+import org.fintech.solanawallet.domain.wallet.dto.WalletRequestDTO;
+import org.fintech.solanawallet.domain.wallet.model.Wallet;
+import org.fintech.solanawallet.domain.wallet.service.TransferService;
+import org.fintech.solanawallet.domain.wallet.service.WalletService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/wallet")
+@RequestMapping("/api/v1/wallet")
 public class WalletController {
 
     private final WalletService walletService;
@@ -20,9 +24,9 @@ public class WalletController {
         this.transferService = transferService;
     }
 
-    @PostMapping
-    public ResponseEntity<Map<String, String>> createWallet() {
-        return ResponseEntity.ok(walletService.createWallet());
+    @PostMapping("")
+    public ResponseEntity<Wallet> createWallet(@RequestBody WalletRequestDTO requestDTO) {
+        return ResponseEntity.ok(walletService.createWallet(requestDTO));
     }
 
     @GetMapping("/{publicKey}/balance")
@@ -30,13 +34,40 @@ public class WalletController {
         return ResponseEntity.ok(walletService.getBalance(publicKey));
     }
 
+    @GetMapping("/{publicKey}")
+    public ResponseEntity<Double> getWallet(@PathVariable String publicKey) {
+        return ResponseEntity.ok(walletService.getWallet(publicKey));
+    }
+
     @PostMapping("/transfer")
-    public ResponseEntity<String> transfer(@RequestBody TransferRequestDto transferRequest) {
-        String signature = transferService.transfer(
-                transferRequest.getWalletId(),
-                transferRequest.getToPublicKey(),
-                transferRequest.getAmount()
-        );
-        return ResponseEntity.ok(signature);
+    public ResponseEntity<String> transfer(@RequestBody TransferRequestDTO transferRequest) {
+        String result = transferService.transfer(transferRequest);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/{publicKey}/airdrop")
+    public ResponseEntity<Map<String, Object>> airdrop(@PathVariable String publicKey, @RequestParam double amount) {
+        Map<String, Object> result = walletService.airdrop(publicKey, amount);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{publicKey}/transactions")
+    public ResponseEntity<List<Map<String, Object>>> getTransactionHistory(@PathVariable String publicKey) {
+        return ResponseEntity.ok(walletService.getTransactionHistory(publicKey));
+    }
+
+    @GetMapping("/transaction/{signature}/status")
+    public ResponseEntity<Map<String, Object>> getTransactionStatus(@PathVariable String signature) {
+        return ResponseEntity.ok(walletService.getTransactionStatus(signature));
+    }
+
+    @GetMapping("/validate/{publicKey}")
+    public ResponseEntity<Map<String, Object>> validateAddress(@PathVariable String publicKey) {
+        return ResponseEntity.ok(walletService.validateAddress(publicKey));
+    }
+
+    @GetMapping("/network")
+    public ResponseEntity<Map<String, Object>> getNetworkInfo() {
+        return ResponseEntity.ok(walletService.getNetworkInfo());
     }
 }

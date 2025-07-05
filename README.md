@@ -1,0 +1,2 @@
+# Implementation of Solana RPC
+* This application provides a REST API to interact with the Solana blockchain. Users can perform actions such as querying wallet balances, making transfers, viewing transaction history, validating addresses, and estimating transfer fees. The application connects to the real Solana network to provide up-to-date data and is developed with Spring Boot.
